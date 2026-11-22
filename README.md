@@ -1,11 +1,10 @@
 # BiSaiChouQian
-球类比赛分组抽签工具规则：① 同公司选手必须分到不同组；② 同公司人数尽量平均分到上半区(A–D)与下半区(E–H)；③ 已确定的种子选手固定在指定组，只补该组其余名额；④ 每次随机可重抽。所有计算都在本机浏览器完成，不上传任何数据。
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>八组随机抽签工具</title>
+<title>个人赛八组随机抽签工具</title>
 <style>
   :root{
     --navy:#16263f; --navy2:#1f3a5f; --gold:#c9a24b; --gold-l:#e8d49a;
@@ -423,11 +422,6 @@ function downloadResult(){
   a.click();
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
-}
-</script>
-</body>
-</html>
-
 }
 </script>
 </body>
