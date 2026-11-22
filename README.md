@@ -1,5 +1,5 @@
 # BiSaiChouQian
-乒乓球分组抽签工具规则：① 同公司选手必须分到不同组；② 同公司人数尽量平均分到上半区(A–D)与下半区(E–H)；③ 已确定的种子选手固定在指定组，只补该组其余名额；④ 每次随机可重抽。所有计算都在本机浏览器完成，不上传任何数据。
+球类比赛分组抽签工具规则：① 同公司选手必须分到不同组；② 同公司人数尽量平均分到上半区(A–D)与下半区(E–H)；③ 已确定的种子选手固定在指定组，只补该组其余名额；④ 每次随机可重抽。所有计算都在本机浏览器完成，不上传任何数据。
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -92,13 +92,16 @@
       <button class="btn-gold" onclick="runDraw(true)">重新抽取</button>
       <button class="btn-ghost" onclick="loadDemo()">填入示例</button>
       <button class="btn-ghost" onclick="clearAll()">清空</button>
+      <button class="btn-ghost" onclick="downloadResult()">下载结果</button>
     </div>
     <div class="warn" id="warn"></div>
   </div>
 
   <!-- ===== 结果面板 ===== -->
   <div class="panel" id="result">
-    <h2>抽签结果 <span style="font-size:13px;color:var(--muted);font-weight:400" id="meta"></span></h2>
+    <h2>抽签结果 <span style="font-size:13px;color:var(--muted);font-weight:400" id="meta"></span>
+      <button class="btn-ghost" style="float:right;padding:6px 16px;font-size:13px" onclick="downloadResult()">下载保存结果</button>
+    </h2>
     <div class="half-title half-up">上半区 A – D</div>
     <div class="grid" id="gridUp"></div>
     <div class="half-title half-down">下半区 E – H</div>
@@ -120,6 +123,7 @@
 <script>
 const GROUPS = ['A','B','C','D','E','F','G','H'];
 const UP = new Set(['A','B','C','D']);
+let lastResult = null;   // 保存最近一次抽签结果，供下载使用
 
 /* ---------- 解析输入 ---------- */
 function parseInput(){
@@ -282,6 +286,7 @@ function showWarn(msg){
 
 /* ---------- 渲染 ---------- */
 function render(best, total){
+  lastResult = best;
   document.getElementById('result').style.display='block';
   document.getElementById('meta').textContent = `（共 ${total} 人，每组目标 ${Math.floor(total/8)}–${Math.ceil(total/8)} 人；点「重新抽取」可换一组随机结果）`;
 
@@ -328,12 +333,14 @@ function render(best, total){
     `同组冲突 <b class="${conflict?'bad':'good'}">${conflict} 处</b>；上下半区偏差>1 的公司 <b>${badSplit} 家</b>。`;
 
   // ===== 小组循环赛次序（每轮1场，逐轮进行） =====
+  lastResult.schedules = {};
   const wrap = document.getElementById('scheduleWrap');
   wrap.innerHTML = '';
   GROUPS.forEach(g=>{
     const list = best.members[g];
-    if(list.length < 2) return;
+    if(list.length < 2){ lastResult.schedules[g] = []; return; }
     const schedule = linearSchedule(list);
+    lastResult.schedules[g] = schedule;
     const box = document.createElement('div');
     box.className = 'sched-group';
     let html = `<div class="sched-head"><span>第 ${g} 组循环赛</span><span class="meta">${list.length} 人 · 共 ${schedule.length} 轮（每轮 1 场）</span></div><div class="sched-body">`;
@@ -384,6 +391,43 @@ function clearAll(){
   document.getElementById('input').value='';
   document.getElementById('result').style.display='none';
   document.getElementById('warn').style.display='none';
+  lastResult = null;
+}
+
+/* ---------- 下载保存结果（TXT，含分组与赛程） ---------- */
+function downloadResult(){
+  if(!lastResult){ showWarn('请先完成一次抽签，再下载结果。'); return; }
+  const now = new Date();
+  const pad = n=>String(n).padStart(2,'0');
+  const stamp = `${now.getFullYear()}${pad(now.getMonth()+1)}${pad(now.getDate())}_${pad(now.getHours())}${pad(now.getMinutes())}`;
+  const lines = [];
+  lines.push('小组抽签结果');
+  lines.push('生成时间：' + now.toLocaleString());
+  lines.push('='.repeat(38));
+  GROUPS.forEach(g=>{
+    const list = lastResult.members[g];
+    lines.push('');
+    lines.push(`【第 ${g} 组】（${list.length} 人）`);
+    list.forEach(p=>lines.push(`  ${p.name}（${p.company}）${p.seed?'［种子］':''}`));
+    const sched = lastResult.schedules[g] || [];
+    sched.forEach(([a,b],i)=>lines.push(`    第${i+1}轮：${a.name}（${a.company}） VS ${b.name}（${b.company}）`));
+  });
+  lines.push('');
+  lines.push('='.repeat(38));
+  const blob = new Blob(['\ufeff' + lines.join('\r\n')], {type:'text/plain;charset=utf-8'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `分组抽签结果_${stamp}.txt`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+</script>
+</body>
+</html>
+
 }
 </script>
 </body>
