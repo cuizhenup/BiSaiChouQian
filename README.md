@@ -1,5 +1,4 @@
 # BiSaiChouQian
-<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
@@ -75,7 +74,7 @@
 <body>
 <div class="wrap">
   <header>
-    <h1><span class="dot"></span>八组随机抽签工具</h1>
+    <h1><span class="dot"></span>个人赛八组随机抽签工具</h1>
     <p>规则：8 组（A–H）人数尽量均衡；同公司选手不得同组；同公司尽量平均分到上半区(A–D)/下半区(E–H)；种子选手固定进指定组，仅补该组其余名额；可反复重抽。</p>
   </header>
 
